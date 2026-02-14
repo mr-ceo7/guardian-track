@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Guardian-Track: IoT RFID Student Monitoring Dashboard - Real-time student tracking, gate authorization, and security alerts"
+    />
+    <title>Guardian-Track | Student Monitoring Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- ===== HEADER ===== -->
+    <header id="main-header">
+      <div class="header-left">
+        <div class="logo">
+          <div class="logo-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+          </div>
+          <h1>Guardian<span>Track</span></h1>
+        </div>
+        <div class="mode-badge" id="mode-badge">FREE TIME</div>
+      </div>
+      <div class="header-right">
+        <div class="connection-status" id="connection-status">
+          <span class="status-dot" id="status-dot"></span>
+          <span id="status-text">Disconnected</span>
+        </div>
+        <button class="btn btn-connect" id="btn-connect">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="16"
+            height="16"
+          >
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 01-8 0" />
+          </svg>
+          <span>Connect</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main id="dashboard">
+      <!-- ===== TOP STATS BAR ===== -->
+      <section class="stats-bar" id="stats-bar">
+        <div class="stat-card" id="stat-in-school">
+          <div class="stat-icon stat-icon-school">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-school-count">0</span>
+            <span class="stat-label">In School</span>
+          </div>
+        </div>
+        <div class="stat-card" id="stat-classroom">
+          <div class="stat-icon stat-icon-class">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" />
+              <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" />
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-class-count">0</span>
+            <span class="stat-label">In Classroom</span>
+          </div>
+        </div>
+        <div class="stat-card" id="stat-hostel">
+          <div class="stat-icon stat-icon-hostel">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M3 22V8l9-6 9 6v14" />
+              <rect x="9" y="14" width="6" height="8" />
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-hostel-count">0</span>
+            <span class="stat-label">In Hostel</span>
+          </div>
+        </div>
+        <div class="stat-card" id="stat-left">
+          <div class="stat-icon stat-icon-left">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-left-count">0</span>
+            <span class="stat-label">Left School</span>
+          </div>
+        </div>
+        <div class="stat-card stat-card-danger" id="stat-sneaked">
+          <div class="stat-icon stat-icon-sneaked">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+              />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-sneaked-count">0</span>
+            <span class="stat-label">Sneaked Out</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== MAIN GRID ===== -->
+      <div class="main-grid">
+        <!-- ===== SCHOOL MAP ===== -->
+        <section class="card map-card" id="map-card">
+          <div class="card-header">
+            <h2>School Map — Live Tracking</h2>
+            <div class="card-actions">
+              <div class="mode-toggle" id="mode-toggle">
+                <label class="toggle-label">
+                  <input type="checkbox" id="mode-checkbox" />
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-text" id="toggle-text">Free Time</span>
+              </div>
+            </div>
+          </div>
+          <div class="map-container" id="map-container">
+            <svg
+              id="school-map"
+              viewBox="0 0 800 500"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <!-- School boundary -->
+              <defs>
+                <linearGradient
+                  id="schoolGrad"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="100%"
+                >
+                  <stop
+                    offset="0%"
+                    style="stop-color: rgba(16, 185, 129, 0.05)"
+                  />
+                  <stop
+                    offset="100%"
+                    style="stop-color: rgba(59, 130, 246, 0.05)"
+                  />
+                </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              <!-- School grounds -->
+              <rect
+                x="40"
+                y="30"
+                width="720"
+                height="440"
+                rx="16"
+                fill="url(#schoolGrad)"
+                stroke="rgba(255,255,255,0.08)"
+                stroke-width="2"
+                stroke-dasharray="8,4"
+              />
+              <text
+                x="400"
+                y="22"
+                text-anchor="middle"
+                fill="rgba(255,255,255,0.25)"
+                font-size="12"
+                font-family="Inter"
+              >
+                SCHOOL COMPOUND
+              </text>
+
+              <!-- Gate Zone -->
+              <rect
+                class="zone zone-gate"
+                id="zone-gate"
+                x="320"
+                y="380"
+                width="160"
+                height="80"
+                rx="12"
+              />
+              <text
+                x="400"
+                y="410"
+                text-anchor="middle"
+                fill="rgba(255,255,255,0.9)"
+                font-size="14"
+                font-weight="600"
+                font-family="Inter"
+              >
+                🚪 MAIN GATE
+              </text>
+              <text
+                x="400"
+                y="430"
+                text-anchor="middle"
+                fill="rgba(255,255,255,0.5)"
+                font-size="11"
+                font-family="Inter"
+                class="zone-count"
+                id="gate-zone-count"
+              >
+                0 students
+              </text>
+              <!-- Gate road -->
+              <rect
+                x="370"
+                y="460"
+                width="60"
+                height="20"
+                rx="4"
+                fill="rgba(251,191,36,0.15)"
+                stroke="rgba(251,191,36,0.3)"
+                stroke-width="1"
+              />
+              <text
+                x="400"
+                y="474"
+                text-anchor="middle"
+                fill="rgba(251,191,36,0.6)"
+                font-size="8"
+                font-family="Inter"
+              >
+                EXIT →
+              </text>
+
+              <!-- Classroom Zone -->
+              <rect
+                class="zone zone-classroom"
+                id="zone-classroom"
+                x="80"
+                y="80"
+                width="280"
+                height="220"
+                rx="12"
+              />
+              <text
+                x="220"
+                y="130"
+                text-anchor="middle"
+                fill="rgba(255,255,255,0.9)"
+                font-size="16"
+                font-weight="600"
+                font-family="Inter"
+              >
+                📚 CLASSROOM
+              </text>
+              <text
+                x="220"
+                y="155"
+                text-anchor="middle"
+                fill="rgba(255,255,255,0.5)"
+                font-size="12"
+                font-family="Inter"
+                class="zone-count"
+                id="class-zone-count"
+              >
+                0 students
+              </text>
+              <!-- Student dots container for classroom -->
+              <g id="classroom-students"></g>
+
+              <!-- Hostel Zone -->
+              <rect
+                class="zone zone-hostel"
+                id="zone-hostel"
+                x="440"
+                y="80"
+                width="280"
+                height="220"
+                rx="12"
+              />
+              <text
+                x="580"
+                y="130"
+                text-anchor="middle"
+                fill="rgba(255,255,255,0.9)"
+                font-size="16"
+                font-weight="600"
+                font-family="Inter"
+              >
+                🏠 HOSTEL
+              </text>
+              <text
+                x="580"
+                y="155"
+                text-anchor="middle"
+                fill="rgba(255,255,255,0.5)"
+                font-size="12"
+                font-family="Inter"
+                class="zone-count"
+                id="hostel-zone-count"
+              >
+                0 students
+              </text>
+              <!-- Student dots container for hostel -->
+              <g id="hostel-students"></g>
+
+              <!-- Gate students -->
+              <g id="gate-students"></g>
+
+              <!-- Outside / Sneaked area -->
+              <g id="outside-area">
+                <text
+                  x="400"
+                  y="498"
+                  text-anchor="middle"
+                  fill="rgba(239,68,68,0.4)"
+                  font-size="10"
+                  font-family="Inter"
+                >
+                  OUTSIDE SCHOOL
+                </text>
+              </g>
+              <g id="outside-students"></g>
+            </svg>
+          </div>
+        </section>
+
+        <!-- ===== RIGHT PANEL ===== -->
+        <div class="right-panel">
+          <!-- ===== STUDENT LIST ===== -->
+          <section class="card student-card" id="student-card">
+            <div class="card-header">
+              <h2>Students</h2>
+              <span class="student-total" id="student-total">0 registered</span>
+            </div>
+            <div class="student-list" id="student-list">
+              <div class="empty-state">
+                <p>No data yet. Connect to Arduino to see students.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== ALERTS FEED ===== -->
+          <section class="card alerts-card" id="alerts-card">
+            <div class="card-header">
+              <h2>Live Alerts</h2>
+              <button class="btn btn-small btn-clear" id="btn-clear-alerts">
+                Clear
+              </button>
+            </div>
+            <div class="alerts-list" id="alerts-list">
+              <div class="empty-state">
+                <p>No alerts yet.</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== ALERT SOUND ===== -->
+    <audio id="alert-sound" preload="auto">
+      <source
+        src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgkKuwo3ZPREp8nKedglhHSXGUo5t+W0tMc5ahm4BdTU5ylqGaf15OT3OWoZl/X09QdJagmH9fT1B1lZ+Yf19QUHWV"
+        type="audio/wav"
+      />
+    </audio>
+
+    <script src="app.js"></script>
+  </body>
+</html>
