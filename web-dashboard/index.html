@@ -2,415 +2,302 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Guardian-Track: IoT RFID Student Monitoring Dashboard - Real-time student tracking, gate authorization, and security alerts"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1" />
+    <meta name="description" content="Guardian-Track: IoT RFID Student Monitoring Dashboard — Real-time student tracking, gate authorization, and security alerts" />
+    <meta name="theme-color" content="#0a1628" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="GuardianTrack" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <link rel="manifest" href="manifest.json" />
     <title>Guardian-Track | Student Monitoring Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+            colors: {
+              dark: { 900: '#050a14', 800: '#0a1628', 700: '#101d35', 600: '#162443' },
+              accent: { DEFAULT: '#10b981', light: '#34d399', dark: '#059669' },
+              cyber: { DEFAULT: '#06b6d4', light: '#22d3ee' },
+            }
+          }
+        }
+      }
+    </script>
     <link rel="stylesheet" href="style.css" />
   </head>
-  <body>
+  <body class="bg-dark-900 text-white font-sans min-h-screen overflow-x-hidden">
+
+    <!-- ===== AMBIENT BACKGROUND ===== -->
+    <div class="ambient-bg" aria-hidden="true">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+
     <!-- ===== HEADER ===== -->
-    <header id="main-header">
-      <div class="header-left">
-        <div class="logo">
-          <div class="logo-icon">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
+    <header id="main-header" class="fixed top-0 left-0 right-0 z-50 glass-header">
+      <div class="flex items-center justify-between px-4 py-3 md:px-6">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-cyber flex items-center justify-center shadow-lg shadow-accent/20">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" class="w-5 h-5">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             </svg>
           </div>
-          <h1>Guardian<span>Track</span></h1>
+          <h1 class="text-lg font-bold tracking-tight hidden sm:block">Guardian<span class="text-accent">Track</span></h1>
+          <div id="mode-badge" class="ml-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-accent/15 text-accent border border-accent/20">FREE TIME</div>
         </div>
-        <div class="mode-badge" id="mode-badge">FREE TIME</div>
-      </div>
-      <div class="header-right">
-        <div class="connection-status" id="connection-status">
-          <span class="status-dot" id="status-dot"></span>
-          <span id="status-text">Disconnected</span>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 text-xs">
+            <span id="status-dot" class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            <span id="status-text" class="text-white/50 hidden sm:inline">Disconnected</span>
+          </div>
+          <button id="btn-connect" class="btn-glass px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 text-accent border border-accent/30 hover:bg-accent/10 transition-all">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 01-8 0" />
+            </svg>
+            <span>Connect</span>
+          </button>
         </div>
-        <button class="btn btn-connect" id="btn-connect">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            width="16"
-            height="16"
-          >
-            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <path d="M16 10a4 4 0 01-8 0" />
-          </svg>
-          <span>Connect</span>
-        </button>
       </div>
     </header>
 
     <!-- ===== MAIN CONTENT ===== -->
-    <main id="dashboard">
-      <!-- ===== TOP STATS BAR ===== -->
-      <section class="stats-bar" id="stats-bar">
-        <div class="stat-card" id="stat-in-school">
-          <div class="stat-icon stat-icon-school">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-            </svg>
+    <main id="dashboard" class="pt-14 pb-20 md:pb-4">
+
+      <!-- ===== STATS BAR ===== -->
+      <section class="stats-bar px-3 py-3 md:px-6 md:py-4 grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-3">
+        <div class="stat-card glass-card group" data-tilt>
+          <div class="stat-icon bg-accent/15 text-accent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /></svg>
           </div>
           <div class="stat-info">
             <span class="stat-value" id="stat-school-count">0</span>
             <span class="stat-label">In School</span>
           </div>
         </div>
-        <div class="stat-card" id="stat-classroom">
-          <div class="stat-icon stat-icon-class">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" />
-              <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" />
-            </svg>
+        <div class="stat-card glass-card group" data-tilt>
+          <div class="stat-icon bg-blue-500/15 text-blue-400">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" /><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" /></svg>
           </div>
           <div class="stat-info">
             <span class="stat-value" id="stat-class-count">0</span>
-            <span class="stat-label">In Classroom</span>
+            <span class="stat-label">Classroom</span>
           </div>
         </div>
-        <div class="stat-card" id="stat-hostel">
-          <div class="stat-icon stat-icon-hostel">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M3 22V8l9-6 9 6v14" />
-              <rect x="9" y="14" width="6" height="8" />
-            </svg>
+        <div class="stat-card glass-card group" data-tilt>
+          <div class="stat-icon bg-purple-500/15 text-purple-400">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M3 22V8l9-6 9 6v14" /><rect x="9" y="14" width="6" height="8" /></svg>
           </div>
           <div class="stat-info">
             <span class="stat-value" id="stat-hostel-count">0</span>
-            <span class="stat-label">In Hostel</span>
+            <span class="stat-label">Hostel</span>
           </div>
         </div>
-        <div class="stat-card" id="stat-left">
-          <div class="stat-icon stat-icon-left">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
+        <div class="stat-card glass-card group hidden md:flex" data-tilt>
+          <div class="stat-icon bg-amber-500/15 text-amber-400">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
           </div>
           <div class="stat-info">
             <span class="stat-value" id="stat-left-count">0</span>
-            <span class="stat-label">Left School</span>
+            <span class="stat-label">Left</span>
           </div>
         </div>
-        <div class="stat-card stat-card-danger" id="stat-sneaked">
-          <div class="stat-icon stat-icon-sneaked">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
-              />
-              <line x1="12" y1="9" x2="12" y2="13" />
-              <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
+        <div class="stat-card glass-card stat-danger group hidden md:flex" data-tilt>
+          <div class="stat-icon bg-red-500/15 text-red-400">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
           </div>
           <div class="stat-info">
             <span class="stat-value" id="stat-sneaked-count">0</span>
-            <span class="stat-label">Sneaked Out</span>
+            <span class="stat-label">Sneaked</span>
           </div>
         </div>
       </section>
 
-      <!-- ===== MAIN GRID ===== -->
-      <div class="main-grid">
-        <!-- ===== SCHOOL MAP ===== -->
-        <section class="card map-card" id="map-card">
-          <div class="card-header">
-            <h2>School Map — Live Tracking</h2>
-            <div class="card-actions">
-              <div class="mode-toggle" id="mode-toggle">
-                <label class="toggle-label">
+      <!-- ===== TAB CONTENT SECTIONS ===== -->
+      <div class="tab-content px-3 md:px-6">
+        <div class="md:grid md:grid-cols-[1fr_360px] md:gap-4">
+
+          <!-- ===== SCHOOL MAP (Tab: Map) ===== -->
+          <section class="tab-panel active glass-card p-0 overflow-hidden" id="panel-map">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-white/5">
+              <h2 class="text-sm font-semibold text-white/80 flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
+                Live Tracking
+              </h2>
+              <div class="flex items-center gap-2">
+                <label class="toggle-switch">
                   <input type="checkbox" id="mode-checkbox" />
-                  <span class="toggle-slider"></span>
+                  <span class="toggle-track"></span>
                 </label>
-                <span class="toggle-text" id="toggle-text">Free Time</span>
+                <span class="text-[11px] text-white/40" id="toggle-text">Free Time</span>
               </div>
             </div>
-          </div>
-          <div class="map-container" id="map-container">
-            <svg
-              id="school-map"
-              viewBox="0 0 800 500"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <!-- School boundary -->
-              <defs>
-                <linearGradient
-                  id="schoolGrad"
-                  x1="0%"
-                  y1="0%"
-                  x2="100%"
-                  y2="100%"
-                >
-                  <stop
-                    offset="0%"
-                    style="stop-color: rgba(16, 185, 129, 0.05)"
-                  />
-                  <stop
-                    offset="100%"
-                    style="stop-color: rgba(59, 130, 246, 0.05)"
-                  />
-                </linearGradient>
-                <filter id="glow">
-                  <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-                  <feMerge>
-                    <feMergeNode in="coloredBlur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
+            <div class="map-container p-2" id="map-container">
+              <svg id="school-map" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+                <defs>
+                  <linearGradient id="schoolGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color: rgba(16, 185, 129, 0.04)" />
+                    <stop offset="100%" style="stop-color: rgba(6, 182, 212, 0.04)" />
+                  </linearGradient>
+                  <filter id="glow"><feGaussianBlur stdDeviation="4" result="c" /><feMerge><feMergeNode in="c" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+                  <filter id="glow-strong"><feGaussianBlur stdDeviation="6" result="c" /><feMerge><feMergeNode in="c" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+                  <linearGradient id="classGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color: rgba(59, 130, 246, 0.12)" />
+                    <stop offset="100%" style="stop-color: rgba(59, 130, 246, 0.04)" />
+                  </linearGradient>
+                  <linearGradient id="hostelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color: rgba(139, 92, 246, 0.12)" />
+                    <stop offset="100%" style="stop-color: rgba(139, 92, 246, 0.04)" />
+                  </linearGradient>
+                  <linearGradient id="gateGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color: rgba(251, 191, 36, 0.12)" />
+                    <stop offset="100%" style="stop-color: rgba(251, 191, 36, 0.04)" />
+                  </linearGradient>
+                </defs>
 
-              <!-- School grounds -->
-              <rect
-                x="40"
-                y="30"
-                width="720"
-                height="440"
-                rx="16"
-                fill="url(#schoolGrad)"
-                stroke="rgba(255,255,255,0.08)"
-                stroke-width="2"
-                stroke-dasharray="8,4"
-              />
-              <text
-                x="400"
-                y="22"
-                text-anchor="middle"
-                fill="rgba(255,255,255,0.25)"
-                font-size="12"
-                font-family="Inter"
-              >
-                SCHOOL COMPOUND
-              </text>
+                <!-- School grounds -->
+                <rect x="40" y="30" width="720" height="440" rx="16" fill="url(#schoolGrad)" stroke="rgba(255,255,255,0.05)" stroke-width="1.5" stroke-dasharray="6,4" />
+                <text x="400" y="22" text-anchor="middle" fill="rgba(255,255,255,0.15)" font-size="11" font-family="Inter" letter-spacing="3">SCHOOL COMPOUND</text>
 
-              <!-- Gate Zone -->
-              <rect
-                class="zone zone-gate"
-                id="zone-gate"
-                x="320"
-                y="380"
-                width="160"
-                height="80"
-                rx="12"
-              />
-              <text
-                x="400"
-                y="410"
-                text-anchor="middle"
-                fill="rgba(255,255,255,0.9)"
-                font-size="14"
-                font-weight="600"
-                font-family="Inter"
-              >
-                🚪 MAIN GATE
-              </text>
-              <text
-                x="400"
-                y="430"
-                text-anchor="middle"
-                fill="rgba(255,255,255,0.5)"
-                font-size="11"
-                font-family="Inter"
-                class="zone-count"
-                id="gate-zone-count"
-              >
-                0 students
-              </text>
-              <!-- Gate road -->
-              <rect
-                x="370"
-                y="460"
-                width="60"
-                height="20"
-                rx="4"
-                fill="rgba(251,191,36,0.15)"
-                stroke="rgba(251,191,36,0.3)"
-                stroke-width="1"
-              />
-              <text
-                x="400"
-                y="474"
-                text-anchor="middle"
-                fill="rgba(251,191,36,0.6)"
-                font-size="8"
-                font-family="Inter"
-              >
-                EXIT →
-              </text>
+                <!-- Classroom Zone -->
+                <rect class="zone zone-classroom" id="zone-classroom" x="80" y="80" width="280" height="220" rx="14" fill="url(#classGrad)" stroke="rgba(59,130,246,0.2)" stroke-width="1.5" />
+                <text x="220" y="125" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="15" font-weight="700" font-family="Inter">📚 CLASSROOM</text>
+                <text x="220" y="148" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="11" font-family="Inter" class="zone-count" id="class-zone-count">0 students</text>
+                <g id="classroom-students"></g>
 
-              <!-- Classroom Zone -->
-              <rect
-                class="zone zone-classroom"
-                id="zone-classroom"
-                x="80"
-                y="80"
-                width="280"
-                height="220"
-                rx="12"
-              />
-              <text
-                x="220"
-                y="130"
-                text-anchor="middle"
-                fill="rgba(255,255,255,0.9)"
-                font-size="16"
-                font-weight="600"
-                font-family="Inter"
-              >
-                📚 CLASSROOM
-              </text>
-              <text
-                x="220"
-                y="155"
-                text-anchor="middle"
-                fill="rgba(255,255,255,0.5)"
-                font-size="12"
-                font-family="Inter"
-                class="zone-count"
-                id="class-zone-count"
-              >
-                0 students
-              </text>
-              <!-- Student dots container for classroom -->
-              <g id="classroom-students"></g>
+                <!-- Hostel Zone -->
+                <rect class="zone zone-hostel" id="zone-hostel" x="440" y="80" width="280" height="220" rx="14" fill="url(#hostelGrad)" stroke="rgba(139,92,246,0.2)" stroke-width="1.5" />
+                <text x="580" y="125" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="15" font-weight="700" font-family="Inter">🏠 HOSTEL</text>
+                <text x="580" y="148" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="11" font-family="Inter" class="zone-count" id="hostel-zone-count">0 students</text>
+                <g id="hostel-students"></g>
 
-              <!-- Hostel Zone -->
-              <rect
-                class="zone zone-hostel"
-                id="zone-hostel"
-                x="440"
-                y="80"
-                width="280"
-                height="220"
-                rx="12"
-              />
-              <text
-                x="580"
-                y="130"
-                text-anchor="middle"
-                fill="rgba(255,255,255,0.9)"
-                font-size="16"
-                font-weight="600"
-                font-family="Inter"
-              >
-                🏠 HOSTEL
-              </text>
-              <text
-                x="580"
-                y="155"
-                text-anchor="middle"
-                fill="rgba(255,255,255,0.5)"
-                font-size="12"
-                font-family="Inter"
-                class="zone-count"
-                id="hostel-zone-count"
-              >
-                0 students
-              </text>
-              <!-- Student dots container for hostel -->
-              <g id="hostel-students"></g>
+                <!-- Gate Zone -->
+                <rect class="zone zone-gate" id="zone-gate" x="320" y="380" width="160" height="80" rx="14" fill="url(#gateGrad)" stroke="rgba(251,191,36,0.2)" stroke-width="1.5" />
+                <text x="400" y="410" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="13" font-weight="700" font-family="Inter">🚪 MAIN GATE</text>
+                <text x="400" y="430" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="10" font-family="Inter" class="zone-count" id="gate-zone-count">0 students</text>
+                <g id="gate-students"></g>
 
-              <!-- Gate students -->
-              <g id="gate-students"></g>
+                <!-- Exit road -->
+                <rect x="370" y="460" width="60" height="16" rx="4" fill="rgba(251,191,36,0.08)" stroke="rgba(251,191,36,0.15)" stroke-width="1" />
+                <text x="400" y="472" text-anchor="middle" fill="rgba(251,191,36,0.4)" font-size="7" font-family="Inter">EXIT →</text>
 
-              <!-- Outside / Sneaked area -->
-              <g id="outside-area">
-                <text
-                  x="400"
-                  y="498"
-                  text-anchor="middle"
-                  fill="rgba(239,68,68,0.4)"
-                  font-size="10"
-                  font-family="Inter"
-                >
-                  OUTSIDE SCHOOL
-                </text>
-              </g>
-              <g id="outside-students"></g>
-            </svg>
-          </div>
-        </section>
-
-        <!-- ===== RIGHT PANEL ===== -->
-        <div class="right-panel">
-          <!-- ===== STUDENT LIST ===== -->
-          <section class="card student-card" id="student-card">
-            <div class="card-header">
-              <h2>Students</h2>
-              <span class="student-total" id="student-total">0 registered</span>
+                <!-- Outside -->
+                <g id="outside-area">
+                  <text x="400" y="496" text-anchor="middle" fill="rgba(239,68,68,0.3)" font-size="9" font-family="Inter" letter-spacing="2">OUTSIDE SCHOOL</text>
+                </g>
+                <g id="outside-students"></g>
+              </svg>
             </div>
-            <div class="student-list" id="student-list">
-              <div class="empty-state">
-                <p>No data yet. Connect to Arduino to see students.</p>
+          </section>
+
+          <!-- ===== RIGHT PANEL (Desktop: visible, Mobile: tabs) ===== -->
+          <div class="md:flex md:flex-col md:gap-4">
+
+            <!-- ===== STUDENT LIST (Tab: Students) ===== -->
+            <section class="tab-panel glass-card" id="panel-students">
+              <div class="flex items-center justify-between px-4 py-3 border-b border-white/5">
+                <h2 class="text-sm font-semibold text-white/80">Students</h2>
+                <span class="text-[11px] text-white/30 font-medium" id="student-total">0 registered</span>
+              </div>
+              <div class="student-list divide-y divide-white/5 max-h-[280px] md:max-h-[240px] overflow-y-auto custom-scroll" id="student-list">
+                <div class="empty-state px-4 py-8 text-center">
+                  <p class="text-white/25 text-xs">Connect Arduino to see students</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- ===== ALERTS FEED (Tab: Alerts) ===== -->
+            <section class="tab-panel glass-card" id="panel-alerts">
+              <div class="flex items-center justify-between px-4 py-3 border-b border-white/5">
+                <h2 class="text-sm font-semibold text-white/80">Live Alerts</h2>
+                <button class="text-[10px] text-white/30 hover:text-white/60 transition-colors font-medium uppercase tracking-wider" id="btn-clear-alerts">Clear</button>
+              </div>
+              <div class="alerts-list max-h-[280px] md:max-h-[240px] overflow-y-auto custom-scroll" id="alerts-list">
+                <div class="empty-state px-4 py-8 text-center">
+                  <p class="text-white/25 text-xs">No alerts yet</p>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- ===== SETTINGS (Tab: Settings — mobile only) ===== -->
+          <section class="tab-panel glass-card md:hidden" id="panel-settings">
+            <div class="px-4 py-3 border-b border-white/5">
+              <h2 class="text-sm font-semibold text-white/80">Settings</h2>
+            </div>
+            <div class="p-4 space-y-4">
+              <!-- Mode Toggle -->
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-white/80">System Mode</p>
+                  <p class="text-[11px] text-white/30 mt-0.5" id="settings-mode-text">Free Time — no restrictions</p>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="settings-mode-checkbox" />
+                  <span class="toggle-track"></span>
+                </label>
+              </div>
+              <!-- Extra stats for mobile -->
+              <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/5">
+                <div class="text-center p-3 rounded-xl bg-white/[0.02]">
+                  <span class="block text-lg font-bold text-amber-400" id="stat-left-count-mobile">0</span>
+                  <span class="text-[10px] text-white/30">Left School</span>
+                </div>
+                <div class="text-center p-3 rounded-xl bg-red-500/[0.05] border border-red-500/10">
+                  <span class="block text-lg font-bold text-red-400" id="stat-sneaked-count-mobile">0</span>
+                  <span class="text-[10px] text-white/30">Sneaked Out</span>
+                </div>
+              </div>
+              <!-- Demo Mode -->
+              <div class="pt-2 border-t border-white/5">
+                <button id="btn-demo" class="w-full py-2.5 rounded-xl text-xs font-semibold text-white/50 bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all">
+                  Load Demo Data
+                </button>
+              </div>
+              <!-- Connection Info -->
+              <div class="text-center pt-2">
+                <p class="text-[10px] text-white/15">Guardian-Track v2.0 • Web Serial API</p>
+                <p class="text-[10px] text-white/15 mt-0.5">Ctrl+Shift+D for demo mode</p>
               </div>
             </div>
           </section>
 
-          <!-- ===== ALERTS FEED ===== -->
-          <section class="card alerts-card" id="alerts-card">
-            <div class="card-header">
-              <h2>Live Alerts</h2>
-              <button class="btn btn-small btn-clear" id="btn-clear-alerts">
-                Clear
-              </button>
-            </div>
-            <div class="alerts-list" id="alerts-list">
-              <div class="empty-state">
-                <p>No alerts yet.</p>
-              </div>
-            </div>
-          </section>
         </div>
       </div>
     </main>
 
+    <!-- ===== MOBILE BOTTOM NAVIGATION ===== -->
+    <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 z-50 md:hidden glass-nav">
+      <div class="flex items-center justify-around py-2 px-2 safe-bottom">
+        <button class="nav-item active" data-tab="map">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-5 h-5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>
+          <span>Map</span>
+        </button>
+        <button class="nav-item" data-tab="students">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-5 h-5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" /></svg>
+          <span>Students</span>
+        </button>
+        <button class="nav-item" data-tab="alerts">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-5 h-5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" /></svg>
+          <span>Alerts</span>
+          <span class="nav-badge hidden" id="alert-badge">0</span>
+        </button>
+        <button class="nav-item" data-tab="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-5 h-5"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" /></svg>
+          <span>Settings</span>
+        </button>
+      </div>
+    </nav>
+
     <!-- ===== ALERT SOUND ===== -->
     <audio id="alert-sound" preload="auto">
-      <source
-        src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgkKuwo3ZPREp8nKedglhHSXGUo5t+W0tMc5ahm4BdTU5ylqGaf15OT3OWoZl/X09QdJagmH9fT1B1lZ+Yf19QUHWV"
-        type="audio/wav"
-      />
+      <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgkKuwo3ZPREp8nKedglhHSXGUo5t+W0tMc5ahm4BdTU5ylqGaf15OT3OWoZl/X09QdJagmH9fT1B1lZ+Yf19QUHWV" type="audio/wav" />
     </audio>
 
     <script src="app.js"></script>
