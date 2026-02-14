@@ -479,46 +479,58 @@ void deselectAllReaders() {
 // Try to read a card from a specific reader
 // Returns true if a card was read, fills uid buffer
 bool readCard(MFRC522 *reader, byte *uidBuffer) {
-  deselectAllReaders();   // Ensure clean bus state before selecting reader
-  delayMicroseconds(100); // Let SPI bus settle
-
-  // Re-enable antenna — clone MFRC522 modules lose antenna state
-  // when switching between readers on the shared SPI bus
-  reader->PCD_AntennaOn();
+  deselectAllReaders();
   delayMicroseconds(100);
 
-  if (!reader->PICC_IsNewCardPresent())
-    return false;
-  if (!reader->PICC_ReadCardSerial())
-    return false;
+  // Turn on antenna for this reader only
+  reader->PCD_AntennaOn();
+  delay(1); // Give antenna time to energize card
 
-  for (byte i = 0; i < UID_LENGTH; i++) {
-    uidBuffer[i] = reader->uid.uidByte[i];
+  // Use WUPA (Wake-Up) instead of REQA so we can detect cards that were
+  // put into HALT state by RF cross-talk from adjacent readers
+  byte bufferATQA[2];
+  byte bufferSize = sizeof(bufferATQA);
+  MFRC522::StatusCode status = reader->PICC_WakeupA(bufferATQA, &bufferSize);
+
+  if (status != MFRC522::STATUS_OK) {
+    reader->PCD_AntennaOff(); // Turn off to prevent RF interference
+    return false;
   }
 
-  reader->PICC_HaltA();
-  reader->PCD_StopCrypto1();
-  return true;
+  // Card detected — read its serial
+  if (reader->PICC_ReadCardSerial()) {
+    for (byte i = 0; i < UID_LENGTH; i++) {
+      uidBuffer[i] = reader->uid.uidByte[i];
+    }
+    reader->PICC_HaltA();
+    reader->PCD_StopCrypto1();
+    reader->PCD_AntennaOff(); // Turn off to prevent RF interference
+    return true;
+  }
+
+  reader->PCD_AntennaOff();
+  return false;
 }
 
 // Check if a card is still present at a reader (for continuous detection)
 bool isCardPresent(MFRC522 *reader) {
-  deselectAllReaders(); // Ensure clean bus state
+  deselectAllReaders();
   delayMicroseconds(100);
 
   reader->PCD_AntennaOn();
-  delayMicroseconds(100);
+  delay(1);
 
   byte bufferATQA[2];
   byte bufferSize = sizeof(bufferATQA);
 
-  // Use WakeupA to check if a card is still in range
   MFRC522::StatusCode result = reader->PICC_WakeupA(bufferATQA, &bufferSize);
 
   if (result == MFRC522::STATUS_OK) {
     reader->PICC_HaltA();
+    reader->PCD_AntennaOff();
     return true;
   }
+  reader->PCD_AntennaOff();
   return false;
 }
 
